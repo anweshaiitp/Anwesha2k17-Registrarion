@@ -121,16 +121,19 @@ public class MainActivity extends AppCompatActivity {
                                                 break;
                                             case 400:
                                                 Toast.makeText(getApplicationContext(), "Invalid Email Id", Toast.LENGTH_SHORT).show();
+                                                buttonSignIn.setVisibility(View.VISIBLE);
                                                 break;
                                             case 409:
                                                 Toast.makeText(getApplicationContext(), R.string.message_registration_duplicate, Toast.LENGTH_LONG).show();
-
+                                                buttonSignIn.setVisibility(View.VISIBLE);
                                                 break;
                                             case 403:
                                                 Toast.makeText(getApplicationContext(), "Invalid Login", Toast.LENGTH_LONG).show();
+                                                buttonSignIn.setVisibility(View.VISIBLE);
                                                 break;
                                             default:
                                                 Toast.makeText(getApplicationContext(), "Error logging in. Please try again later", Toast.LENGTH_SHORT).show();
+                                                buttonSignIn.setVisibility(View.VISIBLE);
                                         }
 
                                         buttonSignIn.setVisibility(View.VISIBLE);

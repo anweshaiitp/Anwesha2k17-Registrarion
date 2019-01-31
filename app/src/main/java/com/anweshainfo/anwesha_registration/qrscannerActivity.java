@@ -21,11 +21,13 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -64,6 +66,9 @@ public class qrscannerActivity extends AppCompatActivity implements ZXingScanner
     Spinner eventsspinner;
     @BindView(R.id.rv_participants)
     RecyclerView recyclerView;
+    @BindView(R.id.anwID)
+    EditText anwidEdittext;
+
     private SharedPreferences.Editor isLogged;
     private ZXingScannerView mScannerView;
     private ArrayAdapter<String> spinnerArrayAdapter;
@@ -75,10 +80,10 @@ public class qrscannerActivity extends AppCompatActivity implements ZXingScanner
     private RVAdapter rvAdapter;
     private String eventName;
     private String eventId;
-    private boolean isPaymentReg = false;
+    private boolean isQrpair = false;
     private boolean iseveReg = false;
     private boolean isViewReq = false;
-    private String paymentRegId = "0";
+    private String qrPairid = "0";
     private String viewUserId = "view";
     private String mMakepaymentUrl;
     private CustomSpinnerAdapter customSpinnerAdapter;
@@ -134,17 +139,17 @@ public class qrscannerActivity extends AppCompatActivity implements ZXingScanner
                 //setting the value
                 eventName = string.get(i);
                 eventId = id.get(i);
-                if (eventId.equals(paymentRegId)) {
-                    isPaymentReg = true;
+                if (eventId.equals(qrPairid)) {
+                    isQrpair = true;
                     iseveReg = false;
                     isViewReq = false;
                 } else if (eventId.equals(viewUserId)) {
-                    isPaymentReg = false;
+                    isQrpair = false;
                     iseveReg = false;
                     isViewReq = true;
                 } else {
                     iseveReg = true;
-                    isPaymentReg = false;
+                    isQrpair = false;
                     isViewReq = false;
                 }
                 setUpRV();
@@ -342,9 +347,10 @@ public class qrscannerActivity extends AppCompatActivity implements ZXingScanner
             String postUrl = mBaseUrl + rawResult.getText();
             //make a network call
             makePost(postUrl);
-        } else if (isPaymentReg) {
+        } else if (isQrpair) {
+            String anwID = anwidEdittext.getText().toString();
             //launch a new intent to make payment
-            makePaymentReg(rawResult.getText(), false);
+           qrPairUser(anwID,rawResult.getText());
         } else if (isViewReq) {
             //launch a new intent to view user
             makePaymentReg(rawResult.getText(), true);
@@ -564,35 +570,6 @@ public class qrscannerActivity extends AppCompatActivity implements ZXingScanner
         };
         mQueue.add(stringRequest);
 
-
-
-
-
-
-
-//        // Request a string response from the provided URL.
-//        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl,
-//                new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//
-//                        Log.e("TAG Volley", response);
-//                        //After getting the response put it in string and start the activity
-//                        Intent intent = new Intent(qrscannerActivity.this, payment_activity.class);
-//                        intent.putExtra("jsonresponse", response);
-//                        intent.putExtra("viewOnly", viewOnly);
-//                        startActivity(intent);
-//                        // Display the first 500 characters of the response string.
-//
-//                    }
-//                }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                Log.e("TAG", error.getMessage());
-//            }
-//        });
-//        // Add the request to the RequestQueue.
-//        mQueue.add(stringRequest);
     }
 
 
@@ -620,6 +597,71 @@ public class qrscannerActivity extends AppCompatActivity implements ZXingScanner
         }
 
         return null;
+    }
+
+    private void qrPairUser(String userId, String qrCode) {
+        String requestUrl = getString(R.string.qrPair)+userId+"/"+qrCode;
+        Log.e("QRPAIR",requestUrl);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, requestUrl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.v("Response:", response);
+
+                        try {
+
+                            JSONObject jsonObject = new JSONObject(response);
+                            int status = jsonObject.getInt("http");
+
+                            switch (status) {
+                                case 200:
+                                    Intent intent = new Intent(qrscannerActivity.this, reg_result.class);
+                                    intent.putExtra("jsonresponse", response);
+                                    startActivity(intent);
+                                    // Display the first 500 characters of the response string.
+                                    break;
+                                default:
+                                    Toast.makeText(getApplicationContext(), "Error pairing the qr", Toast.LENGTH_SHORT).show();
+                                    Log.e("QRPAIR",response);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.v("Error : ", error.toString());
+                        error.printStackTrace();
+                        Toast.makeText(getApplicationContext(), "Error logging in. Please try again later", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("authKey", mSharedPreferences.getString("key", ""));
+                Log.e("USERID : ", getuID().substring(3));
+                Log.e("AUTHKEY : ", mSharedPreferences.getString("key", ""));
+                params.put("userID",getuID().substring(3));
+                Log.e("QRPair", params.toString());
+
+                return params;
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Accept", "application/json");
+                return headers;
+            }
+        };
+//        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+//                0,
+//                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+//                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        mQueue.add(stringRequest);
     }
 
 }

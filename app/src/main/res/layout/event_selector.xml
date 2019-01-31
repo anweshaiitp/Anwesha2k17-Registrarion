@@ -54,6 +54,17 @@
             android:textSize="20sp" />
     </LinearLayout>
 
+    <EditText android:layout_width="match_parent"
+              android:layout_height="46dp"
+              android:layout_marginLeft="16dp"
+              android:layout_marginRight="16dp"
+              android:layout_marginTop="8dp"
+              android:id="@+id/anwID"
+              android:inputType="number"
+              android:maxLength="4"
+              android:textColor="#fff"
+    />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

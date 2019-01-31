@@ -21,12 +21,12 @@
     <string name="error_empty_field">Empty Field</string>
     <string name="message_registration_duplicate">This Email is registered. Please Sign In</string>
     <string name="url_forgot_password">http://celesta.org.in/reset</string>
-    <string name="url_login">https://anwesha.info/login</string>
+    <string name="url_login">https://www.anwesha.info/login</string>
     <string name="select_event_name">Select Event</string>
-    <string name="url_register">https://anwesha.info/qrReg/</string>
+    <string name="url_register">https://www.anwesha.info/qrReg/</string>
     <string name="qr_orgid">orgID</string>
     <string name="event_id">eveID</string>
-    <string name="makePaymentUrl">https://anwesha.info/pay/</string>
+    <string name="makePaymentUrl">https://www.anwesha.info/pay/</string>
     <string name="payment_uID">uID</string>
     <string name="payment_amt">amt</string>
     <string name="payment_val">val</string>
@@ -39,4 +39,5 @@
     <string name="EnterValue">Enter fee paid (overwrites old value)</string>
     <string name="phone_no">Phone No.</string>
     <string name="view_user_details">View User Details</string>
+    <string name="qrPair">https://www.anwesha.info/qrPair/</string>
 </resources>
